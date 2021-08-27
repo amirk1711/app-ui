@@ -5,20 +5,39 @@ import { useEffect } from "react";
 function BasicConnection() {
 	useEffect(() => {
 		fetch("/api/state/cache", {
-			method: "GET",
+			method: "POST",
 			headers: {
+				Accept: "application/json, text/plain, */*",
 				"Content-Type": "application/json",
 			},
-		})
-			.then((response) => response.json())
-			.then((data) => console.log("Success!", data));
+			body: JSON.stringify({
+				components: [
+					{
+						id: "c1", // unique identifier for first box created
+						name: "Source", // name of the box/component
+					},
+					{
+						id: "c2",
+						name: "Destination",
+					},
+				],
+				links: [
+					{
+						src: "c1", // source of the link
+						dest: "c2", // destination
+					},
+				],
+			}),
+		}).then((response) => {
+			console.log("Response: ", response);
+		});
 	}, []);
 	// create an instance of the engine with all the defaults
 	const engine = createEngine();
 
 	// source
 	const src = new DefaultNodeModel({
-		name: "Sorce",
+		name: "Source",
 		color: "rgb(0,192,255)",
 	});
 	src.setPosition(100, 100);
