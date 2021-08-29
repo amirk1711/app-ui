@@ -3,6 +3,11 @@ import { CanvasWidget } from "@projectstorm/react-canvas-core";
 import { useEffect } from "react";
 
 function BasicConnection() {
+	// const [links, setLinks] = useState([]);
+	// const [components, setComponents] = useState([]);
+	let links = [],
+		components = [];
+
 	useEffect(() => {
 		fetch("/api/state/cache", {
 			method: "POST",
@@ -11,33 +16,21 @@ function BasicConnection() {
 				"Content-Type": "application/json",
 			},
 			body: JSON.stringify({
-				components: [
-					{
-						id: "c1", // unique identifier for first box created
-						name: "Source", // name of the box/component
-					},
-					{
-						id: "c2",
-						name: "Destination",
-					},
-				],
-				links: [
-					{
-						src: "c1", // source of the link
-						dest: "c2", // destination
-					},
-				],
+				components: components,
+				links: links,
 			}),
 		}).then((response) => {
 			console.log("Response: ", response);
 		});
-	}, []);
+	}, [links, components]);
+
 	// create an instance of the engine with all the defaults
 	const engine = createEngine();
 
-	// source
+	// Source
 	const src = new DefaultNodeModel({
 		name: "Source",
+		id: "c1",
 		color: "rgb(0,192,255)",
 	});
 	src.setPosition(100, 100);
@@ -46,6 +39,7 @@ function BasicConnection() {
 	// Destination
 	const dest = new DefaultNodeModel({
 		name: "Destination",
+		id: "c2",
 		color: "rgb(166,220,0)",
 	});
 	dest.setPosition(300, 100);
@@ -54,6 +48,14 @@ function BasicConnection() {
 	// link source and destination nodes
 	const connectorLine = srcPort.link(destPort);
 
+	// when we connect two nodes, update the ui state
+	links.push({ src: src.options.id, dest: dest.options.id });
+	components.push({ id: src.options.id, name: src.options.name });
+	components.push({ id: dest.options.id, name: dest.options.name });
+
+	console.log("links", links);
+	console.log("components", components);
+
 	// create a DiagramModel to contain everything,
 	// add all the elements to it, and then add it to the engine.
 	const model = new DiagramModel();
@@ -61,9 +63,6 @@ function BasicConnection() {
 	engine.setModel(model);
 
 	model.registerListener({
-		sourcePortChanged: function (e) {
-			console.log("1234");
-		},
 		zoomUpdated: function (e) {
 			console.log("canvas zoomed");
 		},
